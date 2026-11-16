@@ -26,6 +26,8 @@ ready_step(F, Order, S) :- dep(F, D), ( D == [] -> S = 0 ; maplist([I, St]>>( nt
 stream(Fs, Arr, E) :- pairs_keys(Arr, Order), length(Fs, L), ( L =:= 0 -> E = [] ; Top is L - 1, numlist(0, Top, Ks),
     findall(S-emit(K, V), ( member(K, Ks), nth0(K, Fs, F), ready_step(F, Order, S), length(Pre, S), append(Pre, _, Arr), values(F, Pre, V) ), E0), msort(E0, E) ).
 % evaluate a formula from the values that have arrived (positions it reads are all there)
-values(F, Arrived, V) :- dep(F, D), ( D == [] -> In = [] ; max_list(D, M), N is M + 1, length(In, N), forall(member(I-X, Arrived), ( I < N -> nth0(I, In, X) ; true )) ), eval_char(F, In, V).
+values(F, Arrived, V) :- dep(F, D), ( D == [] -> In = [] ; max_list(D, M), N is M + 1, length(In, N), fill(Arrived, N, In) ), eval_char(F, In, V).
+fill([], _, _).
+fill([I-X|Ps], N, In) :- ( I < N -> nth0(I, In, X) ; true ), fill(Ps, N, In).
 
 first_output_step(Fs, Order, S) :- maplist([F, St]>>ready_step(F, Order, St), Fs, Ss), min_list(Ss, S).
